@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	
+	<bean id="hikariConfig"
+		  class="com.zaxxer.hikari.HikariConfig">
+ 		  <property name="driverClassName"
+		  			value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"/>
+		  <property name="jdbcUrl"
+		  			value="jdbc:log4jdbc:mysql://localhost:3306/springdb?serverTimezone=Asia/Seoul&amp;useSSL=false"/>
+
+		  <property name="username" value="root"></property>
+		  <property name="password" value="1234"></property>
+	</bean>
+	<!-- hikariCP 설정 정보(DB연결정보) -->
+
+	<!-- hikariCP 사용 디비 연결 DataSource -->
+	<bean id="dataSource"
+		  class="com.zaxxer.hikari.HikariDataSource" 
+		  destroy-method="close"
+		  >
+		  <constructor-arg ref="hikariConfig"/>
+	</bean>
+	<!-- hikariCP 사용 디비 연결 DataSource -->
+	
+	<!-- sqlSessionFactory 객체 - 디비연결,처리,sql 실행, mybaits 설정 -->
+	<bean id="sqlSessionFactory"
+		  class="org.mybatis.spring.SqlSessionFactoryBean">
+		  <property name="dataSource" ref="dataSource"/>		  
+		  <property name="configLocation" 
+		  			value="classpath:/mybatis-config.xml"/>
+		  <property name="mapperLocations" 
+		  			value="classpath:mappers/**/*Mapper.xml"/>
+	</bean>
+
+	<!-- sqlSessionFactory 객체 - 디비연결,처리,sql 실행 -->
+	
+	<!-- SqlSessionTemplate 객체 - 디비 연결(자동처리), MyBatis 설정, sql 실행, 자원해제, 트랜젝션관리, 쓰레드 안정성 관리  -->
+		<bean id="sqlSession"
+			  class="org.mybatis.spring.SqlSessionTemplate" 
+			  destroy-method="clearCache">
+			<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
+		</bean>
+		
+	<!-- com.itwillbs.persistence 패키지 등록-->
+	<context:component-scan base-package="com.itwillbs.persistence"/>
+	<!-- com.itwillbs.service 패키지 등록 -->
+	<context:component-scan base-package="com.itwillbs.service"/>
+</beans>
